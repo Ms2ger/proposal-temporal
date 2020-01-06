@@ -4,13 +4,14 @@ import json
 import sys
 
 PREFIXES = [
-  ["FAIL", "PASS"],
-  ["EXPECTED FAIL", "UNEXPECTED PASS"],
+    ["FAIL", "PASS"],
+    ["EXPECTED FAIL", "UNEXPECTED PASS"],
 ]
+
 
 def parse_expected_failures():
     expected_failures = set()
-    with open("test/expected-failures.txt", "r") as fp:
+    with open("expected-failures.txt", "r") as fp:
         for line in fp:
             line = line.strip()
             if not line:
@@ -20,16 +21,6 @@ def parse_expected_failures():
             expected_failures.add(line)
     return expected_failures
 
-def compare_results(results, expected_failures):
-    unexpected = []
-    for test in results:
-        expected_failure = test["file"] in expected_failures
-        if test["result"]["pass"] == expected_failure:
-            unexpected.append(test)
-
-    return {
-        "unexpected": unexpected,
-    }
 
 def main(filename):
     expected_failures = parse_expected_failures()
@@ -58,6 +49,7 @@ def main(filename):
 
     print("All results as expected.")
     return True
+
 
 if __name__ == "__main__":
     sys.exit(0 if main(sys.argv[1]) else 1)
