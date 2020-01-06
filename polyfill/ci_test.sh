@@ -4,10 +4,8 @@ export NODE_PATH=$PWD/node_modules
 npm install test262-harness esm
 git clone --depth 1 https://github.com/tc39/test262.git
 
-test262-harness --test262Dir ./test262 --prelude prelude.js --hostArgs="-r esm" $@ | tee exec.out
-if grep -q '^[1-9][0-9]* failed$' exec.out; then
-  rm exec.out
-  exit 1
-fi
+#cd test/
 
+test262-harness -r json --test262Dir ./test262 --prelude ./test/prelude.js --hostArgs="-r esm" "test/*/**/*.js" > exec.out
+./test/parseResults.py exec.out
 rm exec.out

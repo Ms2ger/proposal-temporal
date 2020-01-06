@@ -1,0 +1,2 @@
+# Issue with Object.prototype - multiple realms?
+test/Absolute/prototype/builtin.js
