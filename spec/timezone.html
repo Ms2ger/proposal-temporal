@@ -142,8 +142,9 @@
       <emu-alg>
         1. Let _timeZone_ be the *this* value.
         1. Perform ? RequireInternalSlot(_timeZone_, [[InitializedTemporalTimeZone]]).
+        1. Perform ? RequireInternalSlot(_dateTime_, [[InitializedTemporalDateTime]]).
         1. Set _disambiguation_ to ? ToTimeZoneDisambiguation(_disambiguation_).
-        1. <mark>TODO</mark>
+        1. Return ? GetAbsoluteFor(_timeZone_, _dateTime_, _disambiguation_).
       </emu-alg>
     </emu-clause>
 
@@ -230,6 +231,18 @@
         1. Let _object_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%Temporal.TimeZone.prototype%"`, « [[InitializedTemporalTimeZone]], [[Identifier]] »).
         1. Set _object_.[[Identifier]] to _identifier_.
         1. Return _object_.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-temporal-getabsolutefor" aoid="GetAbsoluteFor">
+      <h1>GetAbsoluteFor ( _timeZone_, _dateTime_ )</h1>
+      <emu-alg>
+        1. Assert: Type(_timeZone_) is Object.
+        1. Assert: _timeZone_ has an [[InitializedTemporalTimeZone]] internal slot.
+        1. Assert: Type(_dateTime_) is Object.
+        1. Assert: _dateTime_ has an [[InitializedTemporalDateTime]] internal slot.
+        1. Let _result_ be the moment _absolute_.[[Nanosecond]] nanoseconds from the epoch, in the time zone _timeZone_.[[Identifier]].
+        1. Return ? CreateDateTime(_result_.[[Year]], _result_.[[Month]], _result_.[[Day]], _result_.[[Hour]], _result_.[[Minute]], _result_.[[Second]], _result_.[[Millisecond]], _result_.[[Microsecond]], _result_.[[Nanosecond]]).
       </emu-alg>
     </emu-clause>
 
