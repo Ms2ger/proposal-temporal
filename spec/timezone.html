@@ -235,12 +235,84 @@
     </emu-clause>
 
     <emu-clause id="sec-temporal-getabsolutefor" aoid="GetAbsoluteFor">
-      <h1>GetAbsoluteFor ( _timeZone_, _dateTime_ )</h1>
+      <h1>GetAbsoluteFor ( _timeZone_, _dateTime_, _disambiguation_ )</h1>
       <emu-alg>
         1. Assert: Type(_timeZone_) is Object.
         1. Assert: _timeZone_ has an [[InitializedTemporalTimeZone]] internal slot.
         1. Assert: Type(_dateTime_) is Object.
         1. Assert: _dateTime_ has an [[InitializedTemporalDateTime]] internal slot.
+        1. Assert: _disambiguation_ is one of *"earlier"*, *"later"*, or *"reject"*.
+        1. Let _options_ be 
+    const options = ES.GetTimeZoneEpochValue(
+      GetSlot(this, IDENTIFIER),
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond
+    );
+    if (options.length === 1) {
+      const absolute = Object.create(Absolute.prototype);
+      CreateSlots(absolute);
+      SetSlot(absolute, EPOCHNANOSECONDS, options[0]);
+      return absolute;
+    }
+    if (options.length) {
+      switch (disambiguation) {
+        case 'earlier': {
+          const result = Object.create(Absolute.prototype);
+          CreateSlots(result);
+          SetSlot(result, EPOCHNANOSECONDS, options[0]);
+          return result;
+        }
+        case 'later': {
+          const result = Object.create(Absolute.prototype);
+          CreateSlots(result);
+          SetSlot(result, EPOCHNANOSECONDS, options[1]);
+          return result;
+        }
+        case 'reject': {
+          throw new RangeError(`multiple absolute found`);
+        }
+      }
+    }
+
+
+    const utcns = ES.GetEpochFromParts(
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+      nanosecond
+    );
+    const before = ES.GetTimeZoneOffsetNanoseconds(utcns.minus(bigInt(86400 * 1e9)), GetSlot(this, IDENTIFIER));
+    const after = ES.GetTimeZoneOffsetNanoseconds(utcns.plus(bigInt(86400 * 1e9)), GetSlot(this, IDENTIFIER));
+    const diff = ES.ToDuration({
+      nanoseconds: after.minus(before)
+    });
+    switch (disambiguation) {
+      case 'earlier': {
+        const earlier = dateTime.minus(diff);
+        return this.getAbsoluteFor(earlier, disambiguation);
+      }
+      case 'later': {
+        const later = dateTime.plus(diff);
+        return this.getAbsoluteFor(later, disambiguation);
+      }
+      case 'reject': {
+        throw new RangeError(`no such absolute found`);
+      }
+    }
+
+
         1. Let _result_ be the moment _absolute_.[[Nanosecond]] nanoseconds from the epoch, in the time zone _timeZone_.[[Identifier]].
         1. Return ? CreateDateTime(_result_.[[Year]], _result_.[[Month]], _result_.[[Day]], _result_.[[Hour]], _result_.[[Minute]], _result_.[[Second]], _result_.[[Millisecond]], _result_.[[Microsecond]], _result_.[[Nanosecond]]).
       </emu-alg>
