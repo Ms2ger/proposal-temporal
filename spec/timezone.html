@@ -242,46 +242,25 @@
         1. Assert: Type(_dateTime_) is Object.
         1. Assert: _dateTime_ has an [[InitializedTemporalDateTime]] internal slot.
         1. Assert: _disambiguation_ is one of *"earlier"*, *"later"*, or *"reject"*.
-        1. Let _options_ be 
-    const options = ES.GetTimeZoneEpochValue(
-      GetSlot(this, IDENTIFIER),
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      nanosecond
-    );
-    if (options.length === 1) {
-      const absolute = Object.create(Absolute.prototype);
-      CreateSlots(absolute);
-      SetSlot(absolute, EPOCHNANOSECONDS, options[0]);
-      return absolute;
-    }
-    if (options.length) {
-      switch (disambiguation) {
-        case 'earlier': {
-          const result = Object.create(Absolute.prototype);
-          CreateSlots(result);
-          SetSlot(result, EPOCHNANOSECONDS, options[0]);
-          return result;
-        }
-        case 'later': {
-          const result = Object.create(Absolute.prototype);
-          CreateSlots(result);
-          SetSlot(result, EPOCHNANOSECONDS, options[1]);
-          return result;
-        }
-        case 'reject': {
-          throw new RangeError(`multiple absolute found`);
-        }
-      }
-    }
-
-
+        1. Let _options_ be ? GetTimeZoneEpochValue(_timeZone_.[[Identifier]],
+            _dateTime_.[[Year]], _dateTime_.[[Month]], _dateTime_.[[Day]],
+            _dateTime_.[[Hour]], _dateTime_.[[Minute]], _dateTime_.[[Second]],
+            _dateTime_.[[Millisecond]], _dateTime_.[[Microsecond]], _dateTime_.[[Nanosecond]]).
+        1. Let _length_ be the number of elements in _options_.
+        1. Assert: _length_ ≤ 2.
+        1. If _length_ is 1, then
+          1. Let _epochNanoseconds_ be _options_[0].
+          1. Return ? CreateAbsolute(_epochNanoseconds_).
+        1. If _length_ is 2, then
+          1. If _disambiguation_ is *"earlier"*, then
+            1. Let _epochNanoseconds_ be _options_[0].
+            1. Return ? CreateAbsolute(_epochNanoseconds_).
+          1. Else if _disambiguation_ is *"later"*, then
+            1. Let _epochNanoseconds_ be _options_[1].
+            1. Return ? CreateAbsolute(_epochNanoseconds_).
+          1. Else,
+            1. Throw a *RangeError* exception.
+        1.
     const utcns = ES.GetEpochFromParts(
       year,
       month,
