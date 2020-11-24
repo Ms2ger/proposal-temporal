@@ -426,6 +426,47 @@
     </emu-clause>
     </ins>
 
+    <ins class="block">
+    <emu-clause id="sec-zoneddatetimeformatfields" aoid="ZonedDateTimeFormatFields">
+      <h1>ZonedDateTimeFormatFields ( _formatCalendar_, _x_ )</h1>
+
+      <emu-alg>
+        1. Assert: _x_ has an [[InitializedTemporalZonedDateTime]] internal slot.
+        1. Let _calendar_ be ? CalendarToString(_x_.[[Calendar]]).
+        1. If _calendar_ is _formatCalendar_, then
+          1. Let _zonedDateTime_ be _x_.
+        1. Else if _calendar_ is *"iso8601"*, then
+          1. Let _calendarOverride_ be ? CalendarFrom(_formatCalendar_).
+          1. Let _zonedDateTime_ be ? CreateTemporalZonedDateTime(_x_.[[Nanoseconds]], _x_.[[TimeZone]], _calendarOverride_).
+        1. Else,
+          1. Throw a *RangeError* exception.
+        1. Let _weekday_ be ? ToInteger(? Get(_plainDateTime_, *"dayOfWeek"*)).
+        1. Let _era_ be ? ToInteger(? Get(_plainDateTime_, *"era"*)).
+        1. Let _year_ be ? ToInteger(? Get(_plainDateTime_, *"year"*)).
+        1. Let _relatedYear_ be ? ToInteger(? Get(_plainDateTime_, *"relatedYear"*)).
+        1. Let _yearName_ be ? ToInteger(? Get(_plainDateTime_, *"yearName"*)).
+        1. Let _month_ be ? ToInteger(? Get(_plainDateTime_, *"month"*)).
+        1. Let _day_ be ? ToInteger(? Get(_plainDateTime_, *"day"*)).
+        1. Return the Record {
+            [[Weekday]]: _weekday_,
+            [[Era]]: _era_,
+            [[Year]]: _year_,
+            [[RelatedYear]]: _relatedYear_,
+            [[YearName]]: _yearName_,
+            [[Month]]: _month_,
+            [[Day]]: _day_,
+            [[Hour]]: _plainDateTime_.[[ISOHour]],
+            [[Minute]]: _plainDateTime_.[[ISOMinute]],
+            [[Second]]: _plainDateTime_.[[ISOSecond]],
+            [[InDST]]: *undefined*
+          }.
+
+
+
+      </emu-alg>
+    </emu-clause>
+    </ins>
+
     <emu-clause id="sec-partitiondatetimepattern" aoid="PartitionDateTimePattern">
       <h1>PartitionDateTimePattern ( _dateTimeFormat_, _x_ )</h1>
 
@@ -458,15 +499,30 @@
             1. <ins>Set _x_ to ? GetTemporalDateTimeFor(_timeZone_, _x_, _calendar_).</ins>
             1. <ins>Let _tm_ be ? PlainDateTimeFormatFields(_dateTimeFormat_.[[Calendar]], _x_).</ins>
           1. <ins>If _date_ has an [[InitializedTemporalZonedDateTime]] internal slot, then</ins>
-            1. <ins>Let _calendar_ be ? CalendarToString(_x_.[[Calendar]]).</ins>
+            1. <ins>Let _pattern_ be _dateTimeFormat_.[[TemporalZonedDateTimePattern]].</ins>
+            1. <ins>Let _objectCalendar_ be ? CalendarToString(_x_.[[Calendar]]).</ins>
+            1. If _objectCalendar_ is _dateTimeFormat_.[[Calendar]], then
+              1. Let _calendarOverride_ be _x_.[[Calendar]].
+            1. Else if _objectCalendar_ is *"iso8601"*, then
+              1. Let _calendarOverride_ be ? CalendarFrom(_dateTimeFormat_.[[Calendar]]).
+            1. Else,
+              1. Throw a *RangeError* exception.
+            1. <ins>Let _objectTimeZone_ be ? TimeZoneToString(_x_.[[TimeZone]]).</ins>
+            1. If _objectTimeZone_ is _dateTimeFormat_.[[TimeZone]], then
+              1. Let _timeZoneOverride_ be _x_.[[Calendar]].
+            1. Else if _objectTimeZone_ is *"iso8601"*, then
+              1. Let _timeZoneOverride_ be ? CalendarFrom(_formatCalendar_).
+            1. Else,
+              1. Throw a *RangeError* exception.
+            1. Let _zonedDateTime_ be ? CreateTemporalZonedDateTime(_x_.[[Nanoseconds]], _timeZoneOverride_, _calendarOverride_).
+
+
             1. <ins>If _calendar_ is not *"iso8601"* and not equal to _dateTimeFormat_.[[Calendar]], then</ins>
               1. <ins>Throw a *RangeError* exception.</ins>
-            1. <ins>Let _timeZone_ be ? TimeZoneToString(_x_.[[TimeZone]]).</ins>
             1. <ins>If _dateTimeFormat_.[[TimeZone]] is not equal to DefaultTimeZone(), and _timeZone_ is not equal to _dateTimeFormat_.[[TimeZone]], then</ins>
               1. <ins>Throw a *RangeError* exception.</ins>
             1. <ins>Let _instant_ be ? CreateTemporalInstant(_x_.[[Nanoseconds]]).</ins>
             1. <ins>Set _x_ to ? GetTemporalDateTimeFor(_x_.[[TimeZone]], _instant_, _x_.[[Calendar]]).</ins>
-            1. <ins>Let _pattern_ be _dateTimeFormat_.[[TemporalZonedDateTimePattern]].</ins>
             1. <ins>Let _tm_ be { [[weekday]]: ! ToDayOfWeek(_x_.[[ISOYear]], _x_.[[ISOMonth]], _x_.[[ISODay]]), [[year]]: _x_.[[ISOYear]], [[month]]: _x_.[[ISOMonth]], [[day]]: _x_.[[ISODay]], [[hour]]: _x_.[[ISOHour]], [[minute]]: _x_.[[ISOMinute]], [[second]]: _x_.[[ISOSecond]], [[timeZoneName]]: _timeZone_ }.</ins>
           1. <ins>If _pattern_ is *null*, throw a *TypeError* exception.</ins>
         1. <ins>Else,</ins>
